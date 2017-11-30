@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @Author      Magebay
+ * @package     Magebay_CoinPayment
+ * @copyright   Copyright (c) 2017 MAGEBAY (https://www.magebay.com)
+ * @terms       https://www.magebay.com/terms
+ * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ **/
+ -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Magebay_CoinPayment::main_menu" title="Magebay Coin" module="Magebay_CoinPayment" sortOrder="30" resource="Magebay_CoinPayment::coinpayment" />
+        <add id="Magebay_CoinPayment::manage_payments" title="Manage Coin Payments" module="Magebay_CoinPayment" parent="Magebay_CoinPayment::main_menu" sortOrder="10" action="coinpayment/payments/index" resource="Magebay_CoinPayment::manage_payments"/>
+        <add id="Magebay_CoinPayment::configuration" title="Coin Payment Configuration" module="Magebay_CoinPayment" parent="Magebay_CoinPayment::main_menu" sortOrder="20" action="adminhtml/system_config/edit/section/payment" resource="Magebay_CoinPayment::configuration"/>
+    </menu>
+</config>

@@ -1,0 +1,267 @@
+<?php
+/**
+ * @Author      Magebay
+ * @package     Magebay_CoinPayment
+ * @copyright   Copyright (c) 2017 MAGEBAY (https://www.magebay.com)
+ * @terms       https://www.magebay.com/terms
+ * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ **/
+?>
+<?php 
+    $order = $this->getOrderById($this->getLastOrderId());
+    $description = array();
+    foreach ($order->getAllItems() as $item) {
+        $description[] = number_format($item->getQtyOrdered(), 0) . ' × ' . $item->getName();
+    }
+?>
+<style type="text/css" id="notify-bootstrap">
+    .page-title-wrapper{
+        text-align: center;
+    }
+    .notifyjs-bootstrap-base {
+        font-weight: normal;
+        padding: 8px 15px 8px 14px;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+        background-color: #fcf8e3;
+        border: 1px solid #fbeed5;
+        -webkit-border-radius: 4px;
+        -moz-border-radius: 4px;
+        border-radius: 4px;
+        white-space: nowrap;
+        background-repeat: no-repeat;
+        background-position: 3px 7px;
+        top: 90px;
+        right: 10px;
+        margin-bottom: 10px;
+    }
+    .notifyjs-bootstrap-error {
+        color: #B94A48;
+        background-color: #F2DEDE;
+        border-color: #EED3D7;
+    }
+    .notifyjs-bootstrap-success {
+        color: #468847;
+        background-color: #DFF0D8;
+        border-color: #D6E9C6;
+    }
+    .notifyjs-bootstrap-info {
+        color: #3A87AD;
+        background-color: #D9EDF7;
+        border-color: #BCE8F1;
+    }
+    .notifyjs-bootstrap-warn {
+        color: #C09853;
+        background-color: #FCF8E3;
+        border-color: #FBEED5;
+    }
+</style>
+<body id="page-invoice">
+    <div id="root">
+        <div class="col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3" id="invoice">
+            <div class="content-block">
+                <div class="inner">
+                    <div class="row">
+                        <div class="col-md-12 col-xs-6" style="">
+                            <h4><?php echo __('Order Id : ')?><?php echo '#'.$order->getIncrementId() ?></h4>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 col-xs-6">
+                            <h4>
+                                <?php echo __('Main Website') ?>
+                                <span class="account-verified"></span>
+                            </h4>
+                            <p class="text-muted">
+                                <span><?php echo join($description, '<br/>') ?></span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 col-xs-6">
+                            <div class="text-right">
+                                <h4 style="font-weight: 600; letter-spacing: 0.2px; font-size: 17px;"><?php echo number_format($order->getGrandTotal(), 2, '.', '') ?> Coin</h4>
+                                <span title="" style="color: rgb(189, 195, 199); font-size: 12px; cursor: help;"><?php echo number_format($order->getGrandTotal(), 2, '.', '').' '.$this->getCurrentCurrencyCode() ?></span>
+                            </div>
+                        </div>
+                    </div>
+                    <hr/>
+                    <div class="payment-info" id="payment-unpaid">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div>
+                                    <div class="progress progress-inverse">
+                                        <div class="progress-bar progress-bar-info" id="payment-progress-bar" style="width: 0%; min-width: 0px;"></div>
+                                    </div>
+                                    <div class="text-center" id="payment-countdown"><b id="show-time">600</b> <?php echo __('(s) left') ?></div>
+                                </div>
+                                <div class="text-center" id="payment-address" style="margin-top: 22px; font-size: 15px;">
+                                    <?php echo __('Please send') ?> <b style="text-decoration: underline;"><?php echo __('exactly') ?> <?php echo number_format($order->getGrandTotal(), 2, '.', '') ?> Coin</b> <?php echo __('to') ?>
+                                    <div class="form-inline" style="margin-top: 10px;">
+                                        <div class="input-group">
+                                            <input class="form-control text-center input-address" value="" type="text"/>
+                                            <div class="input-group-btn">
+                                                <button class="btn btn-default clipboard-tooltip" title="" type="button" >
+                                                    <i class="fa fa-copy"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center" id="invoice-qr-code">
+                                    <?php 
+                                        $qr_code = 'Coin:kien'.'?amount='.(float) $order->getGrandTotal();
+                                    ?>                                
+                                    <img src="https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=<?php echo $qr_code ?>&choe=UTF-8" title="<?php echo $qr_code ?>" />
+                                </div>
+                            </div>
+                            <div class="col-xs-12 text-center" style="font-size: 14px; margin-top: 15px;">
+                                <?php echo __('Do NOT send transactions directly from an exchange') ?>
+                                <a href="" target="_blank">
+                                    <i class="fa fa-question-circle"></i>
+                                </a><br/>
+                                <?php echo __('Coin (transaction) fee 0.001 Coin') ?>
+                            </div>
+                            <div class="col-md-12 text-center" style="margin-top: 10px;">
+                                <p>
+                                    <i class="fa fa-exclamation-triangle"></i>
+                                    <?php echo __('Your payment will be confirmed after it receives') ?>
+                                    <a href="" target="_blank">
+                                        <?php echo __('confirmation') ?>
+                                    </a>
+                                    <?php echo __('on the Coin network') ?>
+                                </p>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="text-center" id="payment-address" style="margin-top: 22px; font-size: 15px;">
+                                    <?php echo __('Please copy your address ID to input below, then check status to complete order') ?>
+                                    <div class="form-inline" style="margin-top: 10px;">
+                                        <div class="input-group">
+                                            <input class="form-control text-center input-address data_post" value="" type="text"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="order-footer-details">
+                <?php echo __('Coin Order ID') ?> <?php echo '#'.$order->getIncrementId() ?> | 
+                <a href="https://www.coingecko.com/en/price_calculator/coin/usd" target="_blank">1 Coin = 10000 USD</a>
+            </div>
+            <div class="mt-10 buttons">
+                <div class="clearfix">
+                    <div class="pull-left">
+                        <span class="back-link">
+                            <a class="btn btn-danger btn-sm" href="<?php echo $block->getUrl('coinpayment/checkout/CancelOrder') ?>">
+                                <i class="fa fa-times"></i> <?php echo __('Cancel') ?>
+                            </a>
+                        </span>
+                    </div>
+                    <div class="pull-right check">
+                        <a class="btn btn-success btn-sm check-btn" href="javascript:;">
+                            <i class="fa fa-refresh"></i> <?php echo __('Check') ?>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="check_success" style="display: none;">
+                <div class="text-center" style="margin-bottom: 12px;">
+                    <a class="href_success" href="#">
+                        <button class="btn btn-default btn-sm" style="color: green">
+                            <i class="fa fa-check-circle-o"></i> <?php echo __('Click Here To Complete Order') ?>
+                        </button>
+                    </a>
+                </div>
+            </div>
+            <div class="check_failed" style="display: none;">
+                <div class="text-center" style="margin-bottom: 12px;">
+                    <button class="btn btn-default btn-sm" style="color: red">
+                        <i class="fa fa-exclamation-circle"></i> <?php echo __('The transaction couldn\'t complete, please check again') ?>
+                    </button>
+                </div>
+            </div>
+            <div>
+                <div class="text-center" style="margin-bottom: 12px;">
+                    <a class="btn btn-default btn-sm" href="" target="_blank" style="font-weight: 800;">
+                        <i class="fa fa-info-circle"></i> <?php echo __('How to pay?') ?>
+                    </a>
+                    <button class="btn btn-default btn-sm">
+                        <i class="fa fa-question-circle"></i> <?php echo __('Payment issues? Contact us!') ?>
+                    </button>
+                </div>
+            </div>
+            <div class="footer">
+                <a href="https://coin.info" target="_blank"><?php echo __('Coin') ?></a> | 
+                <a href="https://coin.info/resources.php#Services" target="_blank"><?php echo __('Support') ?></a> | 
+                <a href="https://bitmakler.net/coin___kriptovaluta" target="_blank"><?php echo __('Buy / Sell Coin') ?></a> | 
+                <a href="https://coinforum.com" target="_blank"><?php echo __('Forum') ?></a>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+	require(['jquery','mage/mage'],function($){
+        $('.check-btn').click(function(){
+            $.ajax({
+                type: "POST",
+            	url: '<?php echo $this->getUrl('coinpayment/checkout/checkstatus') ?>',
+            	data : 'data_post='+$('.data_post').val(),
+            	cache: false,
+                showLoader: true,
+                beforeSend:  function() {
+                                          
+                },
+                success:function(data){
+                    if(data.status == true){
+                        $('.check_success').show();
+                        $('.check_failed').hide();
+                        $('.href_success').attr('href','<?php echo $this->getBaseUrl() ?>'+'coinpayment/checkout/CompleteOrder/token/'+data.token);
+                    }else{
+                        $('.check_success').hide();
+                        $('.check_failed').show();
+                        $('.href_success').attr('href','#');
+                    }
+                },
+                error: function (response) {
+                    $('.check_success').hide();
+                    $('.check_failed').show();
+                }
+            });
+        });
+        
+        var s_time = getCookie("s_time")?getCookie("s_time"):0;
+        $(function(){
+            var runner = window.setInterval(function() {
+                var s_remaining = 600 - parseInt(s_time);
+                var m_remaining = s_remaining/60;
+                $("b[id=show-time]").html(Math.floor(s_remaining));
+                                                                
+                var timeCounter = $("b[id=show-time]").html();
+                var updateTime = eval(timeCounter)- eval(1);
+                $("b[id=show-time]").html(updateTime);
+    
+                if(updateTime < 1){
+                    setCookie("s_time", 0);
+                    window.location = ("<?php echo $block->getUrl('coinpayment/checkout/CancelOrder') ?>");
+                    clearInterval( runner );
+                }else{                                        
+                    s_time = parseInt(s_time) + 1;
+                    progress = s_time/6;
+                    $('#payment-progress-bar').css('width',progress+'%');
+                    setCookie("s_time", s_time);
+                    console.log(getCookie("s_time"));
+                }
+            }, 1000);
+        });                
+        function setCookie(key, value) {
+            var expires = new Date();
+            expires.setTime(expires.getTime() + (1 * 24 * 60 * 60 * 1000));
+            document.cookie = key + '=' + value + ';expires=' + expires.toUTCString();
+        }
+        function getCookie(key) {
+            var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
+            return keyValue ? keyValue[2] : null;
+        }
+	});
+</script>

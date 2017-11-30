@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @Author      Magebay
+ * @package     Magebay_CoinPayment
+ * @copyright   Copyright (c) 2017 MAGEBAY (https://www.magebay.com)
+ * @terms       https://www.magebay.com/terms
+ * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ **/
+ -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Store/etc/config.xsd">
+    <default>
+        <payment>
+            <coinpayment>
+                <active>1</active>
+                <title>Coin Payment</title>
+                <order_status>pending_payment</order_status>
+                <payment_mode>sandbox</payment_mode>
+                <merchant_id></merchant_id>
+                <rate></rate>
+                <allowed_carrier></allowed_carrier>
+                <allowspecific></allowspecific>
+                <specificcountry></specificcountry>
+                <instructions>Magebay Coin Payment</instructions>
+                <sort_order>1</sort_order>
+                <model>Magebay\CoinPayment\Model\CoinPayment</model>
+                <payment_action>true</payment_action>                             
+            </coinpayment>
+        </payment>
+    </default>
+</config>
