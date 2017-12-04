@@ -49,4 +49,13 @@ class PlaceOrder extends Template
     public function getCurrentCurrencyCode(){
         return $this->_storeManager->getStore()->getCurrentCurrency()->getCode();
     }
+    
+    public function getPrice($price){
+        return \Magento\Framework\App\ObjectManager::getInstance()->create('Magento\Framework\Pricing\Helper\Data')->currency(number_format($price,2), true, false);
+    }
+    
+    public function getCoinPayments(){
+        $coinPayments = \Magento\Framework\App\ObjectManager::getInstance()->create('Magebay\CoinPayment\Model\Payments')->getCollection();
+        return $coinPayments;
+    }
 }

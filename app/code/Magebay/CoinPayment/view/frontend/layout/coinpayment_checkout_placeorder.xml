@@ -10,7 +10,7 @@
  -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
     <head>    
-		<css src="Magebay_CoinPayment::css/font-awesome.min.css" />	
+		<css src="Magebay_CoinPayment::css/font-awesome/css/font-awesome.min.css" />	
         <css src="Magebay_CoinPayment::css/style.css" />	
 	</head> 
     <body>

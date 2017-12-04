@@ -52,6 +52,13 @@ class InstallSchema implements InstallSchemaInterface
                     'Code'
                 )
                 ->addColumn(
+                    'coin_address',
+                    Table::TYPE_TEXT,
+                    null,
+                    ['nullable' => false, 'default' => ''],
+                    'Coin Address'
+                )
+                ->addColumn(
                     'auto_rate',
                     Table::TYPE_INTEGER,
                     null,

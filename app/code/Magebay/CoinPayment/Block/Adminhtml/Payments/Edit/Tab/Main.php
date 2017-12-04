@@ -86,6 +86,17 @@ class Main extends \Magento\Backend\Block\Widget\Form\Generic implements \Magent
             ]
         );
         $fieldset->addField(
+            'coin_address',
+            'text',
+            [
+                'name' => 'coin_address',
+                'label' => __('Coin Address'),
+                'title' => __('Coin Address'),
+                'required' => true,
+                'disabled' => $isElementDisabled
+            ]
+        );
+        $auto_rate = $fieldset->addField(
             'auto_rate',
             'select',
             [
@@ -97,7 +108,30 @@ class Main extends \Magento\Backend\Block\Widget\Form\Generic implements \Magent
                 'disabled' => $isElementDisabled
             ]
         );
-         $fieldset->addField(
+        $auto_rate->setAfterElementHtml(
+            "<script type=\"text/javascript\">
+                require([
+                    'jquery',
+                    'mage/template',
+                    'jquery/ui',
+                    'mage/translate'
+                ],function($, mageTemplate) {
+                    if($('#payments_auto_rate').val() == 0){
+                        $('#payments_rate').parents('.admin__field').show();
+                    }else{
+                        $('#payments_rate').parents('.admin__field').hide();
+                    }
+                    $('#edit_form').on('change', '#payments_auto_rate', function(event){
+                        if($(this).val() == 0){
+                            $('#payments_rate').parents('.admin__field').show();
+                        }else{
+                            $('#payments_rate').parents('.admin__field').hide();
+                        }
+                    });
+                });
+            </script>"
+        );
+        $fieldset->addField(
             'rate',
             'text',
             [
@@ -105,7 +139,8 @@ class Main extends \Magento\Backend\Block\Widget\Form\Generic implements \Magent
                 'label' => __('Rate'),
                 'title' => __('Rate'),
                 'required' => true,
-                'disabled' => $isElementDisabled
+                'disabled' => $isElementDisabled,
+                'class' => 'validate-number'
             ]
         );
         $fieldset->addField(
@@ -117,7 +152,7 @@ class Main extends \Magento\Backend\Block\Widget\Form\Generic implements \Magent
                 'title' => __('Fee'),
                 'required' => true,
                 'disabled' => $isElementDisabled,
-                'class' => 'validate-number',
+                'class' => 'validate-number'
             ]
         );
         $fieldset->addField(

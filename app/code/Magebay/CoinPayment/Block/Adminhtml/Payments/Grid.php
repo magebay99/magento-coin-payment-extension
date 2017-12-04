@@ -36,7 +36,7 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
         parent::_construct();
         $this->setId('paymentsGrid');
         $this->setDefaultSort('id');
-        $this->setDefaultDir('DESC');
+        $this->setDefaultDir('ESC');
         $this->setSaveParametersInSession(true);
         $this->setUseAjax(true);
         $this->setVarNameFilter('payments_record');
@@ -82,6 +82,14 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
             [
                 'header' => __('Code'),
                 'index' => 'code',
+                'type'   => 'text',
+            ]
+        );
+        $this->addColumn(
+            'coin_address',
+            [
+                'header' => __('Coin Address'),
+                'index' => 'coin_address',
                 'type'   => 'text',
             ]
         );
@@ -136,6 +144,7 @@ class Grid extends \Magento\Backend\Block\Widget\Grid\Extended
                 'header' => __('Sort Order '),
                 'index' => 'sortorder',
                 'type'   => 'text',
+                'width'  => '50px'                
             ]
         );
         $this->addColumn(

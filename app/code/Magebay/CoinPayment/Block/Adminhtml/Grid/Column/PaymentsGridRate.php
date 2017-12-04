@@ -26,11 +26,13 @@ class PaymentsGridRate extends AbstractRenderer
             $data = json_decode(file_get_contents('https://api.coinmarketcap.com/v1/ticker/'), true);
             foreach($data as $dt){
                 if($dt['symbol'] == $row->getCode()){
-                    $cell = '<div class="data-grid-cell-content">'.$this->_objectmanager->create('Magento\Framework\Pricing\Helper\Data')->currency($dt['price_usd'], true, false).'</div>';
+                    //$cell = '<div class="data-grid-cell-content">'.$this->_objectmanager->create('Magento\Framework\Pricing\Helper\Data')->currency($dt['price_usd'], true, false).'</div>';
+                    $cell = '<div class="data-grid-cell-content">'.$this->_objectmanager->create('Magento\Framework\Pricing\PriceCurrencyInterface')->getCurrency()->getCurrencySymbol().$dt['price_usd'].'</div>';
                 }
             }
         }else{
-            $cell = '<div class="data-grid-cell-content">'.$this->_objectmanager->create('Magento\Framework\Pricing\Helper\Data')->currency($row->getRate(), true, false).'</div>';
+            //$cell = '<div class="data-grid-cell-content">'.$this->_objectmanager->create('Magento\Framework\Pricing\Helper\Data')->currency($row->getRate(), true, false).'</div>';
+            $cell = '<div class="data-grid-cell-content">'.$this->_objectmanager->create('Magento\Framework\Pricing\PriceCurrencyInterface')->getCurrency()->getCurrencySymbol().$row->getRate().'</div>';
         }
         return $cell;
     }

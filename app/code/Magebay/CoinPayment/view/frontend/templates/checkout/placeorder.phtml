@@ -10,10 +10,290 @@
 <?php 
     $order = $this->getOrderById($this->getLastOrderId());
     $description = array();
+    $price = array();
     foreach ($order->getAllItems() as $item) {
         $description[] = number_format($item->getQtyOrdered(), 0) . ' × ' . $item->getName();
+        $price[] = $this->getPrice($item->getBaseRowTotalInclTax());
     }
+    $description[] = __('Shipping Price');
+    $price[] = $this->getPrice($order->getShippingAmount());
+    $coinPayments = $this->getCoinPayments();
 ?>
+<form id="checkout_coin_form" class="checkout_coin_form" method="post" novalidate="novalidate" enctype="multipart/form-data">
+    <body id="page-invoice">
+        <div id="root">
+            <div class="col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3" id="invoice">
+                <div class="content-block">
+                    <div class="inner">
+                        <div class="row">
+                            <div class="col-md-12 col-xs-6" style="">
+                                <h4>
+                                    <?php echo __('Order ID : ')?><?php echo '#'.$order->getIncrementId() ?>
+                                </h4>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 col-xs-6">
+                                <h4>
+                                    <?php echo __('Main Website') ?>
+                                    <span class="account-verified"></span>
+                                </h4>
+                                <p class="text-muted">
+                                    <span><?php echo join($description, '<br/>') ?></span>
+                                </p>
+                            </div>
+                            <div class="col-md-6 col-xs-6">
+                                <div class="text-right">
+                                    <h4 style="font-weight: 600; letter-spacing: 0.2px; font-size: 17px;">
+                                        <?php echo $this->getPrice($order->getGrandTotal()) ?>
+                                    </h4>
+                                    <span title="" style="color: rgb(189, 195, 199); font-size: 12px; cursor: help;">
+                                        <?php echo join($price, '<br/>') ?>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div class="payment-info" id="payment-unpaid">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div>
+                                        <div class="progress progress-inverse">
+                                            <div class="progress-bar progress-bar-info" id="payment-progress-bar" style="width: 0%; min-width: 0px;"></div>
+                                        </div>
+                                        <div class="text-center" id="payment-countdown">
+                                            <b id="show-time">600</b>
+                                            <?php echo __('(s) left') ?>
+                                        </div>
+                                    </div>
+                                    <div class="text-center" id="payment-methods" style="margin-top: 22px; font-size: 15px;">
+                                        <b>
+                                            <?php echo __('Select Coin Payment ') ?>
+                                        </b>&nbsp;&nbsp;
+                                        <select id="select_coin_payment" class="select_coin_payment" style="width:50%; border-radius: 10px">
+                                            <option value="null">--- <?php echo __('Select') ?> ---</option>
+                                            <?php foreach($coinPayments as $cpm){ ?>
+                                                <option value="<?php echo $cpm['code'] ?>"><?php echo $cpm['name'] ?></option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+                                    <div class="text-center" id="payment-address" style="margin-top: 22px; font-size: 15px;">
+                                        <div class="payment-address">
+                                            <!--<?php echo __('Please send exactly') ?>
+                                            <b style="text-decoration: underline;">
+                                                <?php echo number_format($order->getGrandTotal(), 2, '.', '') ?> Bit Coin
+                                            </b>
+                                            <?php echo __('to address below') ?>-->
+                                        </div>
+                                        <div class="form-inline" style="margin-top: 10px;">
+                                            <div class="input-group">
+                                                <input id="coin-address" class="form-control text-center input-address coin-address" value="" type="text"/>
+                                                <div class="input-group-btn">
+                                                    <button class="btn btn-default clipboard-tooltip" title="" type="button" >
+                                                        <i class="fa fa-copy"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center" id="invoice-qr-code"></div>
+                                </div>
+                                <div class="col-xs-12 text-center" style="font-size: 14px; margin-top: 15px;">
+                                    <?php echo __('Do NOT send transactions directly from an exchange') ?>
+                                    <a href="https://www.coinbase.com" target="_blank">
+                                        <i class="fa fa-question-circle"></i>
+                                    </a><br/>
+                                    <?php echo __('Coin (transaction) fee 0.001 Coin') ?>
+                                </div>
+                                <div class="col-md-12 text-center" style="margin-top: 10px;">
+                                    <p>
+                                        <i class="fa fa-exclamation-triangle"></i>
+                                        <?php echo __('Your payment will be confirmed after it receives') ?>
+                                        <a href="https://blockchain.info" target="_blank">
+                                            <?php echo __('confirmation') ?>
+                                        </a>
+                                        <?php echo __('on the Coin network') ?>
+                                    </p>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="text-center" id="payment-address" style="margin-top: 22px; font-size: 15px;">
+                                        <?php echo __('Please copy your address ID to input below, then check status to complete order') ?>
+                                        <div class="form-inline" style="margin-top: 10px;">
+                                            <div class="input-group">
+                                                <input class="form-control text-center input-address data_post" value="" type="text"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>                            
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-footer-details">
+                    <?php echo __('Coin Order ID') ?> <?php echo '#'.$order->getIncrementId() ?> | 
+                    <a href="https://coinmarketcap.com" target="_blank"></a>
+                </div>
+                <div class="mt-10 buttons">
+                    <div class="clearfix">
+                        <div class="pull-left">
+                            <span class="back-link">
+                                <a class="btn btn-danger btn-sm" href="<?php echo $block->getUrl('coinpayment/checkout/CancelOrder') ?>">
+                                    <i class="fa fa-times"></i> <?php echo __('Cancel') ?>
+                                </a>
+                            </span>
+                        </div>
+                        <div class="pull-right check">
+                            <a class="btn btn-success btn-sm check-btn" href="javascript:;">
+                                <i class="fa fa-refresh"></i> <?php echo __('Check') ?>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="check_success" style="display: none;">
+                    <div class="text-center" style="margin-bottom: 12px;">
+                        <a class="href_success" href="">
+                            <button class="btn btn-default btn-sm" style="color: green">
+                                <i class="fa fa-check-circle-o"></i> <?php echo __('Click Here To Complete Order') ?>
+                            </button>
+                        </a>
+                    </div>
+                </div>
+                <div class="check_failed" style="display: none;">
+                    <div class="text-center" style="margin-bottom: 12px;">
+                        <button class="btn btn-default btn-sm" style="color: red">
+                            <i class="fa fa-exclamation-circle"></i> <?php echo __('The transaction couldn\'t complete, please check again') ?>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <div class="text-center" style="margin-bottom: 12px;">
+                        <a class="btn btn-default btn-sm" href="" target="_blank" style="font-weight: 800;">
+                            <i class="fa fa-info-circle"></i> <?php echo __('How to pay?') ?>
+                        </a>
+                        <button class="btn btn-default btn-sm">
+                            <i class="fa fa-question-circle"></i> <?php echo __('Payment issues? Contact us!') ?>
+                        </button>
+                    </div>
+                </div>
+                <div class="footer">
+                    <a href="https://magebay.com" target="_blank"><?php echo __('Coin') ?></a> | 
+                    <a href="https://magebay.com" target="_blank"><?php echo __('Support') ?></a> | 
+                    <a href="https://magebay.com" target="_blank"><?php echo __('Buy / Sell Coin') ?></a> | 
+                    <a href="https://magebay.com" target="_blank"><?php echo __('Forum') ?></a>
+                </div>
+            </div>
+        </div>
+    </body>
+</form>
+<script>
+	require(['jquery','mage/mage'],function($){
+        $('#select_coin_payment').change(function(){
+            $.ajax({
+                type: "POST",
+            	url: '<?php echo $this->getUrl('coinpayment/checkout/changecoin') ?>',
+            	data : 'data_post='+$('#select_coin_payment').val(),
+            	cache: false,
+                showLoader: true,
+                beforeSend:  function() {
+                                          
+                },
+                success:function(data){
+                    if(data.status == true){
+                        $('#payment-address .payment-address').html(data['payment-address']);
+                        $('.coin-address').val(data['coin_address']);
+                        $('#invoice-qr-code').html(data['invoice-qr-code']);
+                        $('.order-footer-details a').html(data['order-footer-details']);                        
+                    }else{
+                        $('#payment-address .payment-address').html('');
+                        $('.coin-address').val('');
+                        $('#invoice-qr-code').html('');
+                        $('.order-footer-details a').html('');                        
+                    }
+                },
+                error: function (response) {
+
+                }
+            });
+        });
+        
+        var input = document.getElementById("coin-address");
+        $(".clipboard-tooltip").click(function(event){
+            event.preventDefault();
+            input.select();
+            document.execCommand("copy");
+        });
+        
+        var dataForm = $('#checkout_coin_form');
+        var ignore = null;
+        dataForm.mage('validation', {
+            ignore: ignore ? ':hidden:not(' + ignore + ')' : ':hidden'
+        }).find('input:text').attr('autocomplete', 'off');
+        $('.check-btn').click(function(){
+            dataForm.validation('isValid');
+            $.ajax({
+                type: "POST",
+            	url: '<?php echo $this->getUrl('coinpayment/checkout/checkstatus') ?>',
+            	data : 'coin_address_sendor='+$('.data_post').val()+'&coin_code='+$('.select_coin_payment').val()+'&coin_address_recieve='+$('.coin-address').val(),
+            	cache: false,
+                showLoader: true,
+                beforeSend:  function() {
+                                          
+                },
+                success:function(data){
+                    if(data.status == true){
+                        $('.check_success').show();
+                        $('.check_failed').hide();
+                        $('.href_success').attr('href','<?php echo $this->getBaseUrl() ?>'+'coinpayment/checkout/CompleteOrder/token/'+data.token);
+                    }else{
+                        $('.check_success').hide();
+                        $('.check_failed').show();
+                        $('.href_success').attr('href','#');
+                    }
+                },
+                error: function (response) {
+                    $('.check_success').hide();
+                    $('.check_failed').show();
+                }
+            });
+        });
+        
+        /*var s_time = getCookie("s_time")?getCookie("s_time"):0;
+        $(function(){
+            var runner = window.setInterval(function() {
+                var s_remaining = 600 - parseInt(s_time);
+                var m_remaining = s_remaining/60;
+                $("b[id=show-time]").html(Math.floor(s_remaining));
+                                                                
+                var timeCounter = $("b[id=show-time]").html();
+                var updateTime = eval(timeCounter)- eval(1);
+                $("b[id=show-time]").html(updateTime);
+    
+                if(updateTime < 1){
+                    setCookie("s_time", 0);
+                    window.location = ("<?php echo $block->getUrl('coinpayment/checkout/CancelOrder') ?>");
+                    clearInterval( runner );
+                }else{                                        
+                    s_time = parseInt(s_time) + 1;
+                    progress = s_time/6;
+                    $('#payment-progress-bar').css('width',progress+'%');
+                    setCookie("s_time", s_time);
+                    console.log(getCookie("s_time"));
+                }
+            }, 1000);
+        });                
+        function setCookie(key, value) {
+            var expires = new Date();
+            expires.setTime(expires.getTime() + (1 * 24 * 60 * 60 * 1000));
+            document.cookie = key + '=' + value + ';expires=' + expires.toUTCString();
+        }
+        function getCookie(key) {
+            var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
+            return keyValue ? keyValue[2] : null;
+        }*/
+	});
+</script>
 <style type="text/css" id="notify-bootstrap">
     .page-title-wrapper{
         text-align: center;
@@ -55,213 +335,3 @@
         border-color: #FBEED5;
     }
 </style>
-<body id="page-invoice">
-    <div id="root">
-        <div class="col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3" id="invoice">
-            <div class="content-block">
-                <div class="inner">
-                    <div class="row">
-                        <div class="col-md-12 col-xs-6" style="">
-                            <h4><?php echo __('Order Id : ')?><?php echo '#'.$order->getIncrementId() ?></h4>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 col-xs-6">
-                            <h4>
-                                <?php echo __('Main Website') ?>
-                                <span class="account-verified"></span>
-                            </h4>
-                            <p class="text-muted">
-                                <span><?php echo join($description, '<br/>') ?></span>
-                            </p>
-                        </div>
-                        <div class="col-md-6 col-xs-6">
-                            <div class="text-right">
-                                <h4 style="font-weight: 600; letter-spacing: 0.2px; font-size: 17px;"><?php echo number_format($order->getGrandTotal(), 2, '.', '') ?> Coin</h4>
-                                <span title="" style="color: rgb(189, 195, 199); font-size: 12px; cursor: help;"><?php echo number_format($order->getGrandTotal(), 2, '.', '').' '.$this->getCurrentCurrencyCode() ?></span>
-                            </div>
-                        </div>
-                    </div>
-                    <hr/>
-                    <div class="payment-info" id="payment-unpaid">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div>
-                                    <div class="progress progress-inverse">
-                                        <div class="progress-bar progress-bar-info" id="payment-progress-bar" style="width: 0%; min-width: 0px;"></div>
-                                    </div>
-                                    <div class="text-center" id="payment-countdown"><b id="show-time">600</b> <?php echo __('(s) left') ?></div>
-                                </div>
-                                <div class="text-center" id="payment-address" style="margin-top: 22px; font-size: 15px;">
-                                    <?php echo __('Please send') ?> <b style="text-decoration: underline;"><?php echo __('exactly') ?> <?php echo number_format($order->getGrandTotal(), 2, '.', '') ?> Coin</b> <?php echo __('to') ?>
-                                    <div class="form-inline" style="margin-top: 10px;">
-                                        <div class="input-group">
-                                            <input class="form-control text-center input-address" value="" type="text"/>
-                                            <div class="input-group-btn">
-                                                <button class="btn btn-default clipboard-tooltip" title="" type="button" >
-                                                    <i class="fa fa-copy"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="text-center" id="invoice-qr-code">
-                                    <?php 
-                                        $qr_code = 'Coin:kien'.'?amount='.(float) $order->getGrandTotal();
-                                    ?>                                
-                                    <img src="https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=<?php echo $qr_code ?>&choe=UTF-8" title="<?php echo $qr_code ?>" />
-                                </div>
-                            </div>
-                            <div class="col-xs-12 text-center" style="font-size: 14px; margin-top: 15px;">
-                                <?php echo __('Do NOT send transactions directly from an exchange') ?>
-                                <a href="" target="_blank">
-                                    <i class="fa fa-question-circle"></i>
-                                </a><br/>
-                                <?php echo __('Coin (transaction) fee 0.001 Coin') ?>
-                            </div>
-                            <div class="col-md-12 text-center" style="margin-top: 10px;">
-                                <p>
-                                    <i class="fa fa-exclamation-triangle"></i>
-                                    <?php echo __('Your payment will be confirmed after it receives') ?>
-                                    <a href="" target="_blank">
-                                        <?php echo __('confirmation') ?>
-                                    </a>
-                                    <?php echo __('on the Coin network') ?>
-                                </p>
-                            </div>
-                            <div class="col-md-12">
-                                <div class="text-center" id="payment-address" style="margin-top: 22px; font-size: 15px;">
-                                    <?php echo __('Please copy your address ID to input below, then check status to complete order') ?>
-                                    <div class="form-inline" style="margin-top: 10px;">
-                                        <div class="input-group">
-                                            <input class="form-control text-center input-address data_post" value="" type="text"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>                            
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="order-footer-details">
-                <?php echo __('Coin Order ID') ?> <?php echo '#'.$order->getIncrementId() ?> | 
-                <a href="https://www.coingecko.com/en/price_calculator/coin/usd" target="_blank">1 Coin = 10000 USD</a>
-            </div>
-            <div class="mt-10 buttons">
-                <div class="clearfix">
-                    <div class="pull-left">
-                        <span class="back-link">
-                            <a class="btn btn-danger btn-sm" href="<?php echo $block->getUrl('coinpayment/checkout/CancelOrder') ?>">
-                                <i class="fa fa-times"></i> <?php echo __('Cancel') ?>
-                            </a>
-                        </span>
-                    </div>
-                    <div class="pull-right check">
-                        <a class="btn btn-success btn-sm check-btn" href="javascript:;">
-                            <i class="fa fa-refresh"></i> <?php echo __('Check') ?>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="check_success" style="display: none;">
-                <div class="text-center" style="margin-bottom: 12px;">
-                    <a class="href_success" href="#">
-                        <button class="btn btn-default btn-sm" style="color: green">
-                            <i class="fa fa-check-circle-o"></i> <?php echo __('Click Here To Complete Order') ?>
-                        </button>
-                    </a>
-                </div>
-            </div>
-            <div class="check_failed" style="display: none;">
-                <div class="text-center" style="margin-bottom: 12px;">
-                    <button class="btn btn-default btn-sm" style="color: red">
-                        <i class="fa fa-exclamation-circle"></i> <?php echo __('The transaction couldn\'t complete, please check again') ?>
-                    </button>
-                </div>
-            </div>
-            <div>
-                <div class="text-center" style="margin-bottom: 12px;">
-                    <a class="btn btn-default btn-sm" href="" target="_blank" style="font-weight: 800;">
-                        <i class="fa fa-info-circle"></i> <?php echo __('How to pay?') ?>
-                    </a>
-                    <button class="btn btn-default btn-sm">
-                        <i class="fa fa-question-circle"></i> <?php echo __('Payment issues? Contact us!') ?>
-                    </button>
-                </div>
-            </div>
-            <div class="footer">
-                <a href="https://coin.info" target="_blank"><?php echo __('Coin') ?></a> | 
-                <a href="https://coin.info/resources.php#Services" target="_blank"><?php echo __('Support') ?></a> | 
-                <a href="https://bitmakler.net/coin___kriptovaluta" target="_blank"><?php echo __('Buy / Sell Coin') ?></a> | 
-                <a href="https://coinforum.com" target="_blank"><?php echo __('Forum') ?></a>
-            </div>
-        </div>
-    </div>
-</body>
-<script>
-	require(['jquery','mage/mage'],function($){
-        $('.check-btn').click(function(){
-            $.ajax({
-                type: "POST",
-            	url: '<?php echo $this->getUrl('coinpayment/checkout/checkstatus') ?>',
-            	data : 'data_post='+$('.data_post').val(),
-            	cache: false,
-                showLoader: true,
-                beforeSend:  function() {
-                                          
-                },
-                success:function(data){
-                    if(data.status == true){
-                        $('.check_success').show();
-                        $('.check_failed').hide();
-                        $('.href_success').attr('href','<?php echo $this->getBaseUrl() ?>'+'coinpayment/checkout/CompleteOrder/token/'+data.token);
-                    }else{
-                        $('.check_success').hide();
-                        $('.check_failed').show();
-                        $('.href_success').attr('href','#');
-                    }
-                },
-                error: function (response) {
-                    $('.check_success').hide();
-                    $('.check_failed').show();
-                }
-            });
-        });
-        
-        var s_time = getCookie("s_time")?getCookie("s_time"):0;
-        $(function(){
-            var runner = window.setInterval(function() {
-                var s_remaining = 600 - parseInt(s_time);
-                var m_remaining = s_remaining/60;
-                $("b[id=show-time]").html(Math.floor(s_remaining));
-                                                                
-                var timeCounter = $("b[id=show-time]").html();
-                var updateTime = eval(timeCounter)- eval(1);
-                $("b[id=show-time]").html(updateTime);
-    
-                if(updateTime < 1){
-                    setCookie("s_time", 0);
-                    window.location = ("<?php echo $block->getUrl('coinpayment/checkout/CancelOrder') ?>");
-                    clearInterval( runner );
-                }else{                                        
-                    s_time = parseInt(s_time) + 1;
-                    progress = s_time/6;
-                    $('#payment-progress-bar').css('width',progress+'%');
-                    setCookie("s_time", s_time);
-                    console.log(getCookie("s_time"));
-                }
-            }, 1000);
-        });                
-        function setCookie(key, value) {
-            var expires = new Date();
-            expires.setTime(expires.getTime() + (1 * 24 * 60 * 60 * 1000));
-            document.cookie = key + '=' + value + ';expires=' + expires.toUTCString();
-        }
-        function getCookie(key) {
-            var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
-            return keyValue ? keyValue[2] : null;
-        }
-	});
-</script>
