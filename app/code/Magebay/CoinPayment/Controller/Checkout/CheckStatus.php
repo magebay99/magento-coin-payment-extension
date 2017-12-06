@@ -30,13 +30,10 @@ class CheckStatus extends \Magento\Framework\App\Action\Action
     }
     public function execute()
     {   
-        $helper = \Magento\Framework\App\ObjectManager::getInstance()->create('Magebay\CoinPayment\Helper\Data');
         $order = \Magento\Framework\App\ObjectManager::getInstance()->create('Magento\Sales\Model\Order')->load(\Magento\Framework\App\ObjectManager::getInstance()->create('\Magento\Checkout\Model\Session')->getLastOrderId());
-        $data_post =  $this->getRequest()->getParam('data_post');
-        $data_addr = json_decode(file_get_contents('http://www.insight.market.com:3001/insight-coin-api/addr/'.$data_post), true);
-        $last_transaction = $data_addr['transactions'][0];
-        $data_tx = json_decode(file_get_contents('http://104.207.132.20:3001/insight-coin-api/tx/'.$last_transaction), true);
-        if($data_tx['vout'][1]['value'] == (float) $order->getGrandTotal()){
+        $data_post =  $this->getRequest()->getParams();
+        $check_status = json_decode(file_get_contents('https://projects.magebay.com/api/?coin='.$data_post['coin_code'].'&receiver_wallet='.$data_post['coin_address_recieve'].'&customer_wallet='.$data_post['coin_address_sendor']),true);
+        if($check_status['status'] == true){
             $data['status'] = true;
             $token = $this->generateRandomString();
             \Magento\Framework\App\ObjectManager::getInstance()->create('\Magento\Checkout\Model\Session')->setToken($token);

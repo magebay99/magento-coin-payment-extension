@@ -42,11 +42,14 @@ class ChangeCoin extends \Magento\Framework\App\Action\Action
                 $data['coin_price_usd'] = $cmc['price_usd'];
                 $data['order_price_usd'] = $order->getGrandTotal();
                 $data['coin_price_order'] = $order->getGrandTotal()/$cmc['price_usd'];
+                $data['coin_price_fee'] = $coinPayment['fee'];
+                $data['coin_price_order_total'] = ($order->getGrandTotal()/$cmc['price_usd']) + $coinPayment['fee'];
                 $data['coin_name'] = $cmc['name'];
                 $data['coin_code'] = $cmc['symbol'];
                 $data['coin_address'] = $coinPayment['coin_address'];
-                $data['payment-address'] = __('Please send exactly').' '.'<b style="text-decoration: underline;">'.$data['coin_price_order'].' '.$data['coin_name'].'</b>'.' '.__('to address below');
+                $data['payment-address'] = __('Please send exactly').' '.'<b style="text-decoration: underline;">'.$data['coin_price_order_total'].' '.$data['coin_name'].'</b>'.' '.__('to address below');
                 $data['invoice-qr-code'] = '<img src="https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl='.$data['coin_address'].'&choe=UTF-8" title="'.$data['coin_address'].'"/>';
+                $data['transaction_fee'] = __('Coin (transaction) fee').' '.$data['coin_price_fee'].' '.__('Coin');
                 $data['order-footer-details'] = '1 '.$data['coin_name'].' = '.$data['coin_price_usd'].' USD';
             }
         }

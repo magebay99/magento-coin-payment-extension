@@ -19,7 +19,7 @@
     $price[] = $this->getPrice($order->getShippingAmount());
     $coinPayments = $this->getCoinPayments();
 ?>
-<form id="checkout_coin_form" class="checkout_coin_form" method="post" novalidate="novalidate" enctype="multipart/form-data">
+<!--<form id="checkout_coin_form" class="checkout_coin_form" method="post" novalidate="novalidate" enctype="multipart/form-data">-->
     <body id="page-invoice">
         <div id="root">
             <div class="col-md-8 col-md-offset-2 col-lg-6 col-lg-offset-3" id="invoice">
@@ -71,7 +71,6 @@
                                             <?php echo __('Select Coin Payment ') ?>
                                         </b>&nbsp;&nbsp;
                                         <select id="select_coin_payment" class="select_coin_payment" style="width:50%; border-radius: 10px">
-                                            <option value="null">--- <?php echo __('Select') ?> ---</option>
                                             <?php foreach($coinPayments as $cpm){ ?>
                                                 <option value="<?php echo $cpm['code'] ?>"><?php echo $cpm['name'] ?></option>
                                             <?php } ?>
@@ -102,16 +101,18 @@
                                 </div>
                                 <div class="col-xs-12 text-center" style="font-size: 14px; margin-top: 15px;">
                                     <?php echo __('Do NOT send transactions directly from an exchange') ?>
-                                    <a href="https://www.coinbase.com" target="_blank">
+                                    <a href="#" target="_blank">
                                         <i class="fa fa-question-circle"></i>
                                     </a><br/>
-                                    <?php echo __('Coin (transaction) fee 0.001 Coin') ?>
+                                    <div class="transaction_fee">
+                                        <?php echo __('Coin (transaction) fee 0.001 Coin') ?>
+                                    </div>
                                 </div>
                                 <div class="col-md-12 text-center" style="margin-top: 10px;">
                                     <p>
                                         <i class="fa fa-exclamation-triangle"></i>
                                         <?php echo __('Your payment will be confirmed after it receives') ?>
-                                        <a href="https://blockchain.info" target="_blank">
+                                        <a href="#" target="_blank">
                                             <?php echo __('confirmation') ?>
                                         </a>
                                         <?php echo __('on the Coin network') ?>
@@ -186,9 +187,40 @@
             </div>
         </div>
     </body>
-</form>
+<!--</form>-->
 <script>
 	require(['jquery','mage/mage'],function($){
+        /* load info by first payment option on dropdown */
+        $.ajax({
+            type: "POST",
+        	url: '<?php echo $this->getUrl('coinpayment/checkout/changecoin') ?>',
+        	data : 'data_post='+$('#select_coin_payment').val(),
+        	cache: false,
+            showLoader: true,
+            beforeSend:  function() {
+                                      
+            },
+            success:function(data){
+                if(data.status == true){
+                    $('#payment-address .payment-address').html(data['payment-address']);
+                    $('.coin-address').val(data['coin_address']);
+                    $('#invoice-qr-code').html(data['invoice-qr-code']);
+                    $('.transaction_fee').html(data['transaction_fee']);
+                    $('.order-footer-details a').html(data['order-footer-details']);                        
+                }else{
+                    $('#payment-address .payment-address').html('');
+                    $('.coin-address').val('');
+                    $('#invoice-qr-code').html('');
+                    $('.transaction_fee').html('');
+                    $('.order-footer-details a').html('');                        
+                }
+            },
+            error: function (response) {
+
+            }
+        });
+        
+        /* load info by change payment option on dropdown */
         $('#select_coin_payment').change(function(){
             $.ajax({
                 type: "POST",
@@ -204,11 +236,13 @@
                         $('#payment-address .payment-address').html(data['payment-address']);
                         $('.coin-address').val(data['coin_address']);
                         $('#invoice-qr-code').html(data['invoice-qr-code']);
+                        $('.transaction_fee').html(data['transaction_fee']);
                         $('.order-footer-details a').html(data['order-footer-details']);                        
                     }else{
                         $('#payment-address .payment-address').html('');
                         $('.coin-address').val('');
                         $('#invoice-qr-code').html('');
+                        $('.transaction_fee').html('');
                         $('.order-footer-details a').html('');                        
                     }
                 },
@@ -259,7 +293,7 @@
             });
         });
         
-        /*var s_time = getCookie("s_time")?getCookie("s_time"):0;
+        var s_time = getCookie("s_time")?getCookie("s_time"):0;
         $(function(){
             var runner = window.setInterval(function() {
                 var s_remaining = 600 - parseInt(s_time);
@@ -291,7 +325,7 @@
         function getCookie(key) {
             var keyValue = document.cookie.match('(^|;) ?' + key + '=([^;]*)(;|$)');
             return keyValue ? keyValue[2] : null;
-        }*/
+        }
 	});
 </script>
 <style type="text/css" id="notify-bootstrap">
