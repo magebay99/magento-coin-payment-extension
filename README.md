@@ -12,3 +12,4 @@
   <li>Support Multi Currencies</li>
 
 </ul>
+<p>Contact Us: https://www.magebay.com/contacts</p>
