@@ -31,9 +31,15 @@ class CompleteOrder extends \Magento\Framework\App\Action\Action
     }
     public function execute()
     {   
+        $data = $this->getRequest()->getParams();
         if($this->getRequest()->getParam('token') == \Magento\Framework\App\ObjectManager::getInstance()->create('\Magento\Checkout\Model\Session')->getToken()){
             $order = \Magento\Framework\App\ObjectManager::getInstance()->create('Magento\Sales\Model\Order')->load(\Magento\Framework\App\ObjectManager::getInstance()->create('\Magento\Checkout\Model\Session')->getLastOrderId());
-            $order->setState(Order::STATE_PROCESSING)->setStatus(Order::STATE_PROCESSING);
+            //$order->setState(Order::STATE_PROCESSING)->setStatus(Order::STATE_PROCESSING);
+            $comment  = __('Coin Address Sendor : ').$data['coin_address_sendor'].'<br>';
+            $comment .= __('Coin Code : ').$data['coin_code'].'<br>';
+            $comment .= __('Order Coin Price : ').$data['coin_price'].' '.$data['coin_code'].'<br>';
+            $comment .= __('Coin Address Recieve : ').$data['coin_address_recieve'].'<br>';
+            $order->addStatusHistoryComment($comment)->setIsCustomerNotified(false)->setEntityName('order');
             $order->save();
             $this->_redirect('checkout/onepage/success');
         }

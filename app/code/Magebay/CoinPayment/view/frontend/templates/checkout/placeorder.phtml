@@ -101,14 +101,14 @@
                                 </div>
                                 <div class="col-xs-12 text-center" style="font-size: 14px; margin-top: 15px;">
                                     <?php echo __('Do NOT send transactions directly from an exchange') ?>
-                                    <a href="#" target="_blank">
+                                    <!--<a href="#" target="_blank">
                                         <i class="fa fa-question-circle"></i>
-                                    </a><br/>
+                                    </a><br/>-->
                                     <div class="transaction_fee">
                                         <?php echo __('Coin (transaction) fee 0.001 Coin') ?>
                                     </div>
                                 </div>
-                                <div class="col-md-12 text-center" style="margin-top: 10px;">
+                                <!--<div class="col-md-12 text-center" style="margin-top: 10px;">
                                     <p>
                                         <i class="fa fa-exclamation-triangle"></i>
                                         <?php echo __('Your payment will be confirmed after it receives') ?>
@@ -117,7 +117,7 @@
                                         </a>
                                         <?php echo __('on the Coin network') ?>
                                     </p>
-                                </div>
+                                </div>-->
                                 <div class="col-md-12">
                                     <div class="text-center" id="payment-address" style="margin-top: 22px; font-size: 15px;">
                                         <?php echo __('Please copy your address ID to input below, then check status to complete order') ?>
@@ -187,6 +187,7 @@
             </div>
         </div>
     </body>
+    <input id="coin_price_order_total" type="hidden" />
 <!--</form>-->
 <script>
 	require(['jquery','mage/mage'],function($){
@@ -206,13 +207,15 @@
                     $('.coin-address').val(data['coin_address']);
                     $('#invoice-qr-code').html(data['invoice-qr-code']);
                     $('.transaction_fee').html(data['transaction_fee']);
-                    $('.order-footer-details a').html(data['order-footer-details']);                        
+                    $('.order-footer-details a').html(data['order-footer-details']);
+                    $('#coin_price_order_total').val(data['coin_price_order_total']);
                 }else{
                     $('#payment-address .payment-address').html('');
                     $('.coin-address').val('');
                     $('#invoice-qr-code').html('');
                     $('.transaction_fee').html('');
-                    $('.order-footer-details a').html('');                        
+                    $('.order-footer-details a').html('');
+                    $('#coin_price_order_total').val('');
                 }
             },
             error: function (response) {
@@ -237,13 +240,15 @@
                         $('.coin-address').val(data['coin_address']);
                         $('#invoice-qr-code').html(data['invoice-qr-code']);
                         $('.transaction_fee').html(data['transaction_fee']);
-                        $('.order-footer-details a').html(data['order-footer-details']);                        
+                        $('.order-footer-details a').html(data['order-footer-details']); 
+                        $('#coin_price_order_total').val(data['coin_price_order_total']);                       
                     }else{
                         $('#payment-address .payment-address').html('');
                         $('.coin-address').val('');
                         $('#invoice-qr-code').html('');
                         $('.transaction_fee').html('');
-                        $('.order-footer-details a').html('');                        
+                        $('.order-footer-details a').html('');
+                        $('#coin_price_order_total').val('');
                     }
                 },
                 error: function (response) {
@@ -269,14 +274,14 @@
             $.ajax({
                 type: "POST",
             	url: '<?php echo $this->getUrl('coinpayment/checkout/checkstatus') ?>',
-            	data : 'coin_address_sendor='+$('.data_post').val()+'&coin_code='+$('.select_coin_payment').val()+'&coin_address_recieve='+$('.coin-address').val(),
+            	data : 'coin_address_sendor='+$('.data_post').val()+'&coin_code='+$('.select_coin_payment').val()+'&coin_price='+$('#coin_price_order_total').val()+'&coin_address_recieve='+$('.coin-address').val(),
             	cache: false,
                 showLoader: true,
                 beforeSend:  function() {
                                           
                 },
                 success:function(data){
-                    if(data.status == true){
+                    /*if(data.status == true){
                         $('.check_success').show();
                         $('.check_failed').hide();
                         $('.href_success').attr('href','<?php echo $this->getBaseUrl() ?>'+'coinpayment/checkout/CompleteOrder/token/'+data.token);
@@ -284,7 +289,8 @@
                         $('.check_success').hide();
                         $('.check_failed').show();
                         $('.href_success').attr('href','#');
-                    }
+                    }*/
+                    window.location.href = '<?php echo $this->getBaseUrl() ?>'+'coinpayment/checkout/CompleteOrder/token/'+data.token+'/coin_address_sendor/'+data.coin_address_sendor+'/coin_code/'+data.coin_code+'/coin_price/'+data.coin_price+'/coin_address_recieve/'+data.coin_address_recieve;
                 },
                 error: function (response) {
                     $('.check_success').hide();
@@ -367,5 +373,9 @@
         color: #C09853;
         background-color: #FCF8E3;
         border-color: #FBEED5;
+    }
+    .input-group-btn{
+        border: 1px solid silver;
+        left: 0;
     }
 </style>

@@ -30,7 +30,7 @@ class CheckStatus extends \Magento\Framework\App\Action\Action
     }
     public function execute()
     {   
-        $order = \Magento\Framework\App\ObjectManager::getInstance()->create('Magento\Sales\Model\Order')->load(\Magento\Framework\App\ObjectManager::getInstance()->create('\Magento\Checkout\Model\Session')->getLastOrderId());
+        /*$order = \Magento\Framework\App\ObjectManager::getInstance()->create('Magento\Sales\Model\Order')->load(\Magento\Framework\App\ObjectManager::getInstance()->create('\Magento\Checkout\Model\Session')->getLastOrderId());
         $data_post =  $this->getRequest()->getParams();
         $check_status = json_decode(file_get_contents('https://projects.magebay.com/api/?coin='.$data_post['coin_code'].'&receiver_wallet='.$data_post['coin_address_recieve'].'&customer_wallet='.$data_post['coin_address_sendor']),true);
         if($check_status['status'] == true){
@@ -43,7 +43,16 @@ class CheckStatus extends \Magento\Framework\App\Action\Action
             $token = $this->generateRandomString();
             \Magento\Framework\App\ObjectManager::getInstance()->create('\Magento\Checkout\Model\Session')->setToken($token);
             $data['token'] = $token;
-        }
+        }*/
+        $data_post =  $this->getRequest()->getParams();
+        $data['status'] = true;
+        $token = $this->generateRandomString();
+        \Magento\Framework\App\ObjectManager::getInstance()->create('\Magento\Checkout\Model\Session')->setToken($token);
+        $data['token'] = $token;
+        $data['coin_address_sendor'] = $data_post['coin_address_sendor'];
+        $data['coin_code'] = $data_post['coin_code'];
+        $data['coin_price'] = $data_post['coin_price'];
+        $data['coin_address_recieve'] = $data_post['coin_address_recieve'];
         $resultJson = $this->resultFactory->create(ResultFactory::TYPE_JSON);
         $resultJson->setData($data);
         return $resultJson;
